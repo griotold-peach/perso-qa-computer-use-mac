@@ -3,12 +3,14 @@ import os
 import sys
 import json
 import base64
+from dotenv import load_dotenv
 
 from computer_use_demo.loop import sampling_loop, APIProvider
 from computer_use_demo.tools import ToolResult
 from anthropic.types.beta import BetaMessage, BetaMessageParam
 from anthropic import APIResponse
 
+load_dotenv()
 
 async def main():
     # Set up your Anthropic API key and model
@@ -64,7 +66,7 @@ async def main():
 
     # Run the sampling loop
     messages = await sampling_loop(
-        model="claude-3-5-sonnet-20241022",
+        model="claude-sonnet-4-20250514",
         provider=provider,
         system_prompt_suffix="",
         messages=messages,

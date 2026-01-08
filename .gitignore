@@ -28,3 +28,15 @@ dist/
 
 # macOS Trash folder
 .Trash/
+
+# Environment variables
+.env
+
+# Screenshots (Computer Use 실행 시 생성)
+screenshots/
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.bmp
+*.webp

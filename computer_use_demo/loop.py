@@ -24,7 +24,7 @@ from anthropic.types.beta import (
 
 from .tools import BashTool, ComputerTool, EditTool, ToolCollection, ToolResult
 
-BETA_FLAG = "computer-use-2024-10-22"
+BETA_FLAG = "computer-use-2025-01-24"
 
 
 class APIProvider(StrEnum):
@@ -107,7 +107,7 @@ async def sampling_loop(
             model=model,
             system=system,
             tools=tool_collection.to_params(),
-            betas=["computer-use-2024-10-22"],
+            betas=["computer-use-2025-01-24"],
         )
 
         api_response_callback(cast(APIResponse[BetaMessage], raw_response))

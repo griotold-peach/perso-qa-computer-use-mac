@@ -4,7 +4,7 @@ import io
 from enum import StrEnum
 from typing import Literal, TypedDict
 import pyautogui
-from anthropic.types.beta import BetaToolComputerUse20241022Param
+from anthropic.types.beta import BetaToolComputerUse20250124Param
 
 from .base import BaseAnthropicTool, ToolError, ToolResult
 
@@ -49,7 +49,7 @@ class ComputerTool(BaseAnthropicTool):
     """
 
     name: Literal["computer"] = "computer"
-    api_type: Literal["computer_20241022"] = "computer_20241022"
+    api_type: Literal["computer_20250124"] = "computer_20250124"
     width: int
     height: int
     display_num: int | None
@@ -65,7 +65,7 @@ class ComputerTool(BaseAnthropicTool):
             "display_number": self.display_num,
         }
 
-    def to_params(self) -> BetaToolComputerUse20241022Param:
+    def to_params(self) -> BetaToolComputerUse20250124Param:
         return {"name": self.name, "type": self.api_type, **self.options}
 
     def __init__(self):
@@ -176,6 +176,41 @@ class ComputerTool(BaseAnthropicTool):
         ):
             if text is not None:
                 raise ToolError(f"text is not accepted for {action}")
+            
+            # ✅ 클릭 액션에서는 coordinate 허용
+            if action in ("left_click", "right_click", "double_click"):
+                if coordinate is not None:
+                    # coordinate가 있으면 해당 위치 클릭
+                    if not isinstance(coordinate, list) or len(coordinate) != 2:
+                        raise ToolError(f"coordinate must be a list of length 2")
+                    if not all(isinstance(i, int) and i >= 0 for i in coordinate):
+                        raise ToolError(f"coordinate must be a list of non-negative integers")
+                    
+                    x, y = self.scale_coordinates(
+                        ScalingSource.API, coordinate[0], coordinate[1]
+                    )
+                    
+                    if action == "left_click":
+                        await asyncio.to_thread(pyautogui.click, x, y, button="left")
+                        return ToolResult(output=f"Left click performed at X={x}, Y={y}.")
+                    elif action == "right_click":
+                        await asyncio.to_thread(pyautogui.click, x, y, button="right")
+                        return ToolResult(output=f"Right click performed at X={x}, Y={y}.")
+                    elif action == "double_click":
+                        await asyncio.to_thread(pyautogui.doubleClick, x, y)
+                        return ToolResult(output=f"Double click performed at X={x}, Y={y}.")
+                else:
+                    # coordinate가 없으면 현재 위치에서 클릭
+                    if action == "left_click":
+                        await asyncio.to_thread(pyautogui.click, button="left")
+                        return ToolResult(output="Left click performed.")
+                    elif action == "right_click":
+                        await asyncio.to_thread(pyautogui.click, button="right")
+                        return ToolResult(output="Right click performed.")
+                    elif action == "double_click":
+                        await asyncio.to_thread(pyautogui.doubleClick)
+                        return ToolResult(output="Double click performed.")
+                    
             if coordinate is not None:
                 raise ToolError(f"coordinate is not accepted for {action}")
 
@@ -185,16 +220,6 @@ class ComputerTool(BaseAnthropicTool):
                 x, y = pyautogui.position()
                 x, y = self.scale_coordinates(ScalingSource.COMPUTER, int(x), int(y))
                 return ToolResult(output=f"X={x},Y={y}")
-            else:
-                if action == "left_click":
-                    await asyncio.to_thread(pyautogui.click, button="left")
-                    return ToolResult(output="Left click performed.")
-                elif action == "right_click":
-                    await asyncio.to_thread(pyautogui.click, button="right")
-                    return ToolResult(output="Right click performed.")
-                elif action == "double_click":
-                    await asyncio.to_thread(pyautogui.doubleClick)
-                    return ToolResult(output="Double click performed.")
 
         raise ToolError(f"Invalid action: {action}")
 

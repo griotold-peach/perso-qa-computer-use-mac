@@ -66,7 +66,7 @@ async def main():
 
     # Run the sampling loop
     messages = await sampling_loop(
-        model="claude-sonnet-4-20250514",
+        model="claude-sonnet-4-5-20250929",
         provider=provider,
         system_prompt_suffix="",
         messages=messages,
@@ -74,7 +74,7 @@ async def main():
         tool_output_callback=tool_output_callback,
         api_response_callback=api_response_callback,
         api_key=api_key,
-        only_n_most_recent_images=10,
+        only_n_most_recent_images=3,
         max_tokens=4096,
     )
 
